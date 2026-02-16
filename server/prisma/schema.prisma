@@ -1,0 +1,456 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ========================================
+// USER & AUTHENTICATION
+// ========================================
+
+enum UserRole {
+  ENGINEERING
+  APPROVER
+  OPERATIONS
+  ADMIN
+} 
+
+enum UserStatus {
+  ACTIVE
+  DISABLED
+  PENDING
+}
+
+enum RoleRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model User {
+  id             String     @id @default(cuid())
+  email          String     @unique
+  password       String
+  name           String
+  avatar         String?    // URL to Cloudinary image
+  avatarPublicId String?    // Cloudinary public_id for deletion
+  roles          UserRole[] // Multiple roles per user
+  status         UserStatus @default(ACTIVE)
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  // Relations
+  createdECOs        ECO[]                @relation("CreatedBy")
+  approvals          ECOApproval[]
+  auditLogs          AuditLog[]
+  refreshTokens      RefreshToken[]
+  productAttachments ProductAttachment[]
+  ecoAttachments     ECOAttachment[]
+  roleRequests       RoleRequest[]        @relation("UserRoleRequests")
+  reviewedRequests   RoleRequest[]        @relation("ReviewedRoleRequests")
+
+  @@map("users")
+}
+
+model RoleRequest {
+  id             String            @id @default(cuid())
+  userId         String
+  requestedRoles UserRole[]
+  reason         String?
+  status         RoleRequestStatus @default(PENDING)
+  reviewedBy     String?
+  reviewedAt     DateTime?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  // Relations
+  user     User  @relation("UserRoleRequests", fields: [userId], references: [id], onDelete: Cascade)
+  reviewer User? @relation("ReviewedRoleRequests", fields: [reviewedBy], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("role_requests")
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("refresh_tokens")
+}
+
+// ========================================
+// PRODUCT MASTER
+// ========================================
+
+enum ProductStatus {
+  ACTIVE
+  ARCHIVED
+}
+
+model Product {
+  id                String        @id @default(cuid())
+  name              String
+  status            ProductStatus @default(ACTIVE)
+  currentVersionId  String?       @unique
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  // Relations
+  versions       ProductVersion[]
+  currentVersion ProductVersion?  @relation("CurrentVersion", fields: [currentVersionId], references: [id])
+  ecos           ECO[]
+  bomComponents  BOMComponent[]
+  ecoComponentDrafts ECOBOMComponentDraft[]
+
+  @@map("products")
+}
+
+model ProductVersion {
+  id          String        @id @default(cuid())
+  productId   String
+  version     String // e.g., "v1.0", "v2.0"
+  salePrice   Float
+  costPrice   Float
+  attachments Json?         @default("[]") // Legacy: Array of file URLs (kept for backward compatibility)
+  status      ProductStatus @default(ACTIVE)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  // Relations
+  product              Product              @relation(fields: [productId], references: [id], onDelete: Cascade)
+  currentForProduct    Product?             @relation("CurrentVersion")
+  boms                 BOM[]
+  productAttachments   ProductAttachment[]
+
+  @@unique([productId, version])
+  @@map("product_versions")
+}
+
+model ProductAttachment {
+  id               String         @id @default(cuid())
+  productVersionId String
+  url              String
+  publicId         String         // Cloudinary public_id for deletion
+  fileName         String
+  fileType         String         // MIME type
+  fileSize         Int?           // Size in bytes
+  uploadedBy       String
+  createdAt        DateTime       @default(now())
+
+  // Relations
+  productVersion ProductVersion @relation(fields: [productVersionId], references: [id], onDelete: Cascade)
+  uploader       User           @relation(fields: [uploadedBy], references: [id], onDelete: Restrict)
+
+  @@index([productVersionId])
+  @@map("product_attachments")
+}
+
+// ========================================
+// BILL OF MATERIALS (BOM)
+// ========================================
+
+enum BOMStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
+model BOM {
+  id               String    @id @default(cuid())
+  productVersionId String
+  version          String // e.g., "v1.0", "v2.0"
+  status           BOMStatus @default(DRAFT)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  // Relations
+  productVersion ProductVersion @relation(fields: [productVersionId], references: [id], onDelete: Cascade)
+  components     BOMComponent[]
+  operations     BOMOperation[]
+  ecos           ECO[]
+
+  @@unique([productVersionId, version])
+  @@map("boms")
+}
+
+model BOMComponent {
+  id        String   @id @default(cuid())
+  bomId     String
+  productId String
+  quantity  Float
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  bom     BOM     @relation(fields: [bomId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+
+  @@map("bom_components")
+}
+
+model BOMOperation {
+  id         String   @id @default(cuid())
+  bomId      String
+  name       String
+  time       Float // in minutes
+  workCenter String
+  sequence   Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // Relations
+  bom BOM @relation(fields: [bomId], references: [id], onDelete: Cascade)
+
+  @@map("bom_operations")
+}
+
+// ========================================
+// ENGINEERING CHANGE ORDER (ECO)
+// ========================================
+
+enum ECOType {
+  PRODUCT
+  BOM
+}
+
+enum ECOStatus {
+  DRAFT
+  IN_PROGRESS
+  APPROVED
+  REJECTED
+  APPLIED
+}
+
+model ECO {
+  id            String     @id @default(cuid())
+  title         String
+  type          ECOType
+  productId     String
+  bomId         String?
+  createdBy     String
+  effectiveDate DateTime?
+  versionUpdate Boolean    @default(true) // If true, creates new version; if false, modifies existing
+  currentStage  String     @default("New")
+  status        ECOStatus  @default(DRAFT)
+  draftData     Json? // Stores proposed changes as JSON
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  // Relations
+  product     Product          @relation(fields: [productId], references: [id], onDelete: Restrict)
+  bom         BOM?             @relation(fields: [bomId], references: [id], onDelete: Restrict)
+  creator     User             @relation("CreatedBy", fields: [createdBy], references: [id], onDelete: Restrict)
+  approvals   ECOApproval[]
+  auditLogs   AuditLog[]
+  attachments ECOAttachment[]
+  componentDrafts ECOBOMComponentDraft[]
+  operationDrafts ECOBOMOperationDraft[]
+
+  @@map("ecos")
+}
+
+model ECOAttachment {
+  id         String   @id @default(cuid())
+  ecoId      String
+  url        String
+  publicId   String   // Cloudinary public_id for deletion
+  fileName   String
+  fileType   String   // MIME type
+  fileSize   Int?     // Size in bytes
+  uploadedBy String
+  createdAt  DateTime @default(now())
+
+  // Relations
+  eco      ECO  @relation(fields: [ecoId], references: [id], onDelete: Cascade)
+  uploader User @relation(fields: [uploadedBy], references: [id], onDelete: Restrict)
+
+  @@index([ecoId])
+  @@map("eco_attachments")
+}
+
+// ========================================
+// APPROVAL WORKFLOW
+// ========================================
+
+model ApprovalStage {
+  id               String  @id @default(cuid())
+  name             String  @unique
+  order            Int     @unique
+  requiresApproval Boolean @default(true)
+  isFinal          Boolean @default(false)
+
+  // Relations
+  approvals ECOApproval[]
+
+  @@map("approval_stages")
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model ECOApproval {
+  id         String         @id @default(cuid())
+  ecoId      String
+  stageId    String
+  approvedBy String?
+  approvedAt DateTime?
+  comments   String?
+  status     ApprovalStatus @default(PENDING)
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+
+  // Relations
+  eco      ECO            @relation(fields: [ecoId], references: [id], onDelete: Cascade)
+  stage    ApprovalStage  @relation(fields: [stageId], references: [id], onDelete: Restrict)
+  approver User?          @relation(fields: [approvedBy], references: [id], onDelete: SetNull)
+
+  @@unique([ecoId, stageId])
+  @@map("eco_approvals")
+}
+
+// ========================================
+// AUDIT & TRACEABILITY
+// ========================================
+
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+  APPROVE
+  REJECT
+  ARCHIVE
+  STAGE_TRANSITION
+  VERSION_CREATE
+  ROLE_REQUEST_APPROVED
+  ROLE_REQUEST_REJECTED
+}
+
+enum EntityType {
+  USER
+  PRODUCT
+  PRODUCT_VERSION
+  BOM
+  BOM_COMPONENT
+  BOM_OPERATION
+  ECO
+  ECO_APPROVAL
+}
+
+model AuditLog {
+  id         String      @id @default(cuid())
+  action     AuditAction
+  entityType EntityType
+  entityId   String
+  oldValue   Json? // Previous state
+  newValue   Json? // New state
+  userId     String?
+  ecoId      String?
+  stage      String?
+  comments   String?
+  ipAddress  String?
+  createdAt  DateTime    @default(now())
+
+  // Relations
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+  eco  ECO?  @relation(fields: [ecoId], references: [id], onDelete: Cascade)
+
+  @@index([entityType, entityId])
+  @@index([ecoId])
+  @@index([userId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+// ========================================
+// ECO BOM DRAFT STORAGE
+// ========================================
+
+enum DraftChangeType {
+  ADDED
+  MODIFIED
+  REMOVED
+}
+
+model ECOBOMComponentDraft {
+  id           String           @id @default(cuid())
+  ecoId        String
+  productId    String
+  quantity     Float
+  changeType   DraftChangeType  @default(ADDED)
+  originalComponentId String?  // Reference to original BOMComponent if MODIFIED/REMOVED
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  // Relations
+  eco     ECO     @relation(fields: [ecoId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+
+  @@index([ecoId])
+  @@map("eco_bom_component_drafts")
+}
+
+model ECOBOMOperationDraft {
+  id                  String           @id @default(cuid())
+  ecoId               String
+  name                String
+  time                Float            // in minutes
+  workCenter          String
+  sequence            Int
+  changeType          DraftChangeType  @default(ADDED)
+  originalOperationId String?          // Reference to original BOMOperation if MODIFIED/REMOVED
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
+
+  // Relations
+  eco ECO @relation(fields: [ecoId], references: [id], onDelete: Cascade)
+
+  @@index([ecoId])
+  @@map("eco_bom_operation_drafts")
+}
+
+// ========================================
+// NOTIFICATIONS & REAL-TIME EVENTS
+// ========================================
+
+enum NotificationType {
+  ECO_CREATED
+  ECO_SUBMITTED
+  ECO_APPROVED
+  ECO_REJECTED
+  ECO_APPLIED
+  STAGE_CHANGED
+  APPROVAL_REQUIRED
+  VERSION_CREATED
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  type      NotificationType
+  title     String
+  message   String
+  data      Json? // Additional context
+  userId    String? // If null, it's a broadcast
+  read      Boolean          @default(false)
+  createdAt DateTime         @default(now())
+
+  @@index([userId, read])
+  @@index([createdAt])
+  @@map("notifications")
+}
+
