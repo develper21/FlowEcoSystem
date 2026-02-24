@@ -1,0 +1,43 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Build output
+dist/
+
+# Environment variables
+.env
+
+# Uploads
+uploads/
+
+# Logs
+*.log
+logs/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Testing
+coverage/
+test-*.ps1
+test-*.js
+
+# Documentation (local development only)
+*_PROGRESS.md
+*_STATUS.md
+*_RESULTS.md
+*_COMPLETION.md
+SUMMARY.md
+API_TESTING.md
+QUICKSTART.md
+
+# PM2
+ecosystem.config.js
