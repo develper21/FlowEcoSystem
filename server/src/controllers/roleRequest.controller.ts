@@ -118,7 +118,7 @@ export const createRoleRequest = async (req: any, res: Response): Promise<void> 
 
     if (admins.length > 0) {
       await prisma.notification.createMany({
-        data: admins.map(admin => ({
+        data: admins.map((admin: { id: string }) => ({
           type: 'APPROVAL_REQUIRED',
           title: 'New Role Request',
           message: `${roleRequest.user.name} has requested additional roles: ${requestedRoles.join(', ')}`,
