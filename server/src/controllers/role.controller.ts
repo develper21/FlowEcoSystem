@@ -197,7 +197,7 @@ export const removeRole = async (req: Request, res: Response): Promise<void> => 
     const updatedUser = await prisma.user.update({
       where: { id },
       data: {
-        roles: user.roles.filter((r) => r !== role),
+        roles: user.roles.filter((r: string) => r !== role),
       },
       select: {
         id: true,
