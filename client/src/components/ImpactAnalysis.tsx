@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react';
 import { AlertTriangle, Package, FileText, AlertCircle } from 'lucide-react';
 
 interface ImpactData {
@@ -77,7 +76,7 @@ export default function ImpactAnalysis({ data, loading, entityType }: ImpactAnal
                         <div className="flex-1">
                             <h4 className="font-semibold text-yellow-800 mb-2">⚠️ Impact Warnings</h4>
                             <ul className="space-y-1 text-sm text-yellow-700">
-                                {data.warnings.map((warning, index) => (
+                                {data.warnings?.map((warning, index) => (
                                     <li key={index} className="flex items-start gap-2">
                                         <span className="text-yellow-600 mt-0.5">•</span>
                                         <span>{warning}</span>
