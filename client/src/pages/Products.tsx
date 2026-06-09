@@ -1,18 +1,18 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import { productsApi } from '../api/products.api';
 import type { Product } from '../api/products.api';
 import { operationsApi } from '../api/operations.api';
 import { Plus, Package, Calendar } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { CreateProductModal } from '../components/forms/CreateProductModal';
 import { useAuth } from '../context/AuthContext';
 
 export const ProductsPage = () => {
+    const navigate = useNavigate();
     const { user } = useAuth();
     const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
-    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
     const isEngineering = user?.roles?.includes('ENGINEERING') || user?.roles?.includes('ADMIN');
     const isOperations = user?.roles?.includes('OPERATIONS');
@@ -47,18 +47,12 @@ export const ProductsPage = () => {
                     <p className="text-zinc-400">Manage your product catalog and versions</p>
                 </div>
                 {isEngineering && (
-                    <Button className="flex items-center gap-2" onClick={() => setIsCreateModalOpen(true)}>
+                    <Button className="flex items-center gap-2" onClick={() => navigate('/products/create')}>
                         <Plus className="w-4 h-4" />
                         Create Product
                     </Button>
                 )}
             </div>
-
-            <CreateProductModal
-                isOpen={isCreateModalOpen}
-                onClose={() => setIsCreateModalOpen(false)}
-                onSuccess={loadProducts}
-            />
 
             {loading ? (
                 <div className="text-zinc-500">Loading products...</div>
