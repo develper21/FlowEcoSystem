@@ -7,16 +7,21 @@ import { Dashboard } from './pages/Dashboard';
 import { AppLayout } from './components/layout/AppLayout';
 import { ProductsPage } from './pages/Products';
 import { ProductDetail } from './pages/ProductDetail';
+import { CreateProductPage } from './pages/CreateProduct';
 import { BOMPage } from './pages/BOMs';
 import { BOMDetail } from './pages/BOMDetail';
+import { CreateBOMPage } from './pages/CreateBOM';
 import { ECOPage } from './pages/ECOs';
 import { ECODetail } from './pages/ECODetail';
+import { CreateECOPage } from './pages/CreateECO';
 import { SettingsPage } from './pages/Settings';
 import { Signup } from './pages/Signup';
 import { UsersPage } from './pages/Users';
 import { ReportsPage } from './pages/Reports';
 import { RoleRequestPage } from './pages/RoleRequests';
 import { AdminRoleRequestsPage } from './pages/AdminRoleRequests';
+import { CreateRoleRequestPage } from './pages/CreateRoleRequest';
+import { ApproveUserPage } from './pages/ApproveUser';
 
 // Protected Route Component - requires authentication
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -74,8 +79,10 @@ function App() {
               {/* All roles can access */}
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/products" element={<ProductsPage />} />
+              <Route path="/products/create" element={<CreateProductPage />} />
               <Route path="/products/:id" element={<ProductDetail />} />
               <Route path="/boms" element={<BOMPage />} />
+              <Route path="/boms/create" element={<CreateBOMPage />} />
               <Route path="/boms/:id" element={<BOMDetail />} />
               <Route path="/reports" element={<ReportsPage />} />
 
@@ -83,6 +90,11 @@ function App() {
               <Route path="/ecos" element={
                 <RoleProtectedRoute allowedRoles={['ENGINEERING', 'APPROVER', 'ADMIN']}>
                   <ECOPage />
+                </RoleProtectedRoute>
+              } />
+              <Route path="/ecos/create" element={
+                <RoleProtectedRoute allowedRoles={['ENGINEERING', 'APPROVER', 'ADMIN']}>
+                  <CreateECOPage />
                 </RoleProtectedRoute>
               } />
               <Route path="/ecos/:id" element={
@@ -100,9 +112,15 @@ function App() {
                   <UsersPage />
                 </RoleProtectedRoute>
               } />
+              <Route path="/users/approve" element={
+                <RoleProtectedRoute allowedRoles={['ADMIN']}>
+                  <ApproveUserPage />
+                </RoleProtectedRoute>
+              } />
 
               {/* Role Requests - All authenticated users */}
               <Route path="/role-requests" element={<RoleRequestPage />} />
+              <Route path="/role-requests/create" element={<CreateRoleRequestPage />} />
 
               {/* Admin Role Requests - ADMIN only */}
               <Route path="/admin/role-requests" element={
