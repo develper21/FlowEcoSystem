@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="mainGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#10B981;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#059669;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3B82F6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#2563EB;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background rounded square -->
+  <rect x="4" y="4" width="56" height="56" rx="14" fill="url(#mainGrad)" />
+  
+  <!-- Hexagon icon -->
+  <g transform="translate(32, 32)">
+    <!-- Outer hexagon -->
+    <polygon points="0,-18 15.6,-9 15.6,9 0,18 -15.6,9 -15.6,-9" 
+             fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    
+    <!-- Inner hexagon -->
+    <polygon points="0,-10 8.7,-5 8.7,5 0,10 -8.7,5 -8.7,-5" 
+             fill="url(#accentGrad)" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    
+    <!-- Center dot -->
+    <circle cx="0" cy="0" r="4" fill="white" />
+    
+    <!-- Circuit lines -->
+    <line x1="0" y1="-10" x2="0" y2="-18" stroke="white" stroke-width="2" stroke-linecap="round"/>
+    <line x1="8.7" y1="-5" x2="15.6" y2="-9" stroke="white" stroke-width="2" stroke-linecap="round"/>
+    <line x1="8.7" y1="5" x2="15.6" y2="9" stroke="white" stroke-width="2" stroke-linecap="round"/>
+    <line x1="0" y1="10" x2="0" y2="18" stroke="white" stroke-width="2" stroke-linecap="round"/>
+    <line x1="-8.7" y1="5" x2="-15.6" y2="9" stroke="white" stroke-width="2" stroke-linecap="round"/>
+    <line x1="-8.7" y1="-5" x2="-15.6" y2="-9" stroke="white" stroke-width="2" stroke-linecap="round"/>
+  </g>
+</svg>
