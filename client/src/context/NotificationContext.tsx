@@ -1,8 +1,8 @@
+/* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, CheckCircle, AlertCircle, Info } from 'lucide-react';
 import { useAuth } from './AuthContext';
-import { useNavigate } from 'react-router-dom';
 
 export type NotificationType = 'success' | 'error' | 'info' | 'warning';
 
@@ -92,8 +92,7 @@ export const NotificationProvider = ({ children }: { children: React.ReactNode }
             }
         };
 
-        eventSource.onerror = (err) => {
-            // console.error('SSE Error', err); // Prevent spamming console
+        eventSource.onerror = () => {
             eventSource.close();
         };
 
