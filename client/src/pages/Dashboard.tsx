@@ -2,7 +2,6 @@ import { motion } from 'framer-motion';
 import {
     GitPullRequest,
     CheckCircle2,
-    Clock,
     TrendingUp,
     FileCheck
 } from 'lucide-react';
@@ -18,7 +17,6 @@ import {
     Bar
 } from 'recharts';
 import { useAuth } from '../context/AuthContext';
-import { Button } from '../components/ui/Button';
 import { useState, useEffect } from 'react';
 import { reportsApi } from '../api/reports.api';
 
@@ -28,6 +26,7 @@ import { reportsApi } from '../api/reports.api';
 
 export const Dashboard = () => {
     const { user } = useAuth();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [stats, setStats] = useState<any>(null);
     const [loading, setLoading] = useState(true);
 
@@ -74,6 +73,7 @@ export const Dashboard = () => {
 
     // Helper to get count by status
     const getStatusCount = (status: string) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         return stats.byStatus.find((s: any) => s.status === status)?._count.status || 0;
     };
 
@@ -213,6 +213,7 @@ export const Dashboard = () => {
                     {stats.recentECOs.length === 0 ? (
                         <div className="text-center py-8 text-zinc-500">No recent activity</div>
                     ) : (
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         stats.recentECOs.map((eco: any) => (
                             <div key={eco.id} className="glass-card p-4 rounded-xl flex items-center justify-between group hover:border-primary/30 transition-colors">
                                 <div className="flex items-center gap-4">
@@ -243,6 +244,7 @@ export const Dashboard = () => {
     );
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const StatsCard = ({ title, value, trend, icon, color, variants }: any) => {
     const isPositive = trend.startsWith('+');
     return (
