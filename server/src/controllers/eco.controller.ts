@@ -5,7 +5,7 @@ import { sendNotificationToUser } from './notification.controller';
 
 // Internal function to apply ECO (can be called from transaction)
 async function applyECOInternal(ecoId: string, userId: string, tx: Prisma.TransactionClient): Promise<any> {
-  const eco = await tx.eCO.findUnique({
+  const eco = await (tx as any).eCO.findUnique({
     where: { id: ecoId },
     include: {
       product: {
@@ -42,12 +42,12 @@ async function applyECOInternal(ecoId: string, userId: string, tx: Prisma.Transa
       const versionNumber = parseFloat(currentVersion.version.replace('v', ''));
       const newVersionNumber = `v${(versionNumber + 1.0).toFixed(1)}`;
 
-      await tx.productVersion.update({
+      await (tx as any).productVersion.update({
         where: { id: currentVersion.id },
         data: { status: 'ARCHIVED' },
       });
 
-      const newVersion = await tx.productVersion.create({
+      const newVersion = await (tx as any).productVersion.create({
         data: {
           productId: eco.productId,
           version: newVersionNumber,
@@ -62,7 +62,7 @@ async function applyECOInternal(ecoId: string, userId: string, tx: Prisma.Transa
         },
       });
 
-      await tx.product.update({
+      await (tx as any).product.update({
         where: { id: eco.productId },
         data: {
           currentVersionId: newVersion.id,
@@ -78,7 +78,7 @@ async function applyECOInternal(ecoId: string, userId: string, tx: Prisma.Transa
         newVersionId: newVersion.id,
       };
 
-      await tx.auditLog.create({
+      await (tx as any).auditLog.create({
         data: {
           userId,
           action: AuditAction.VERSION_CREATE,
@@ -91,7 +91,7 @@ async function applyECOInternal(ecoId: string, userId: string, tx: Prisma.Transa
         },
       });
     } else {
-      await tx.productVersion.update({
+      await (tx as any).productVersion.update({
         where: { id: currentVersion.id },
         data: {
           salePrice: draftData.product?.salePrice !== undefined
@@ -117,12 +117,12 @@ async function applyECOInternal(ecoId: string, userId: string, tx: Prisma.Transa
     const currentVersion = currentBom.version;
 
     // Fetch draft changes from ECO BOM draft tables
-    const componentDrafts = await tx.eCOBOMComponentDraft.findMany({
+    const componentDrafts = await (tx as any).eCOBOMComponentDraft.findMany({
       where: { ecoId },
       include: { product: true }
     });
 
-    const operationDrafts = await tx.eCOBOMOperationDraft.findMany({
+    const operationDrafts = await (tx as any).eCOBOMOperationDraft.findMany({
       where: { ecoId },
       orderBy: { sequence: 'asc' }
     });
@@ -131,12 +131,12 @@ async function applyECOInternal(ecoId: string, userId: string, tx: Prisma.Transa
       const versionNumber = parseFloat(currentVersion.replace('v', ''));
       const newVersionNumber = `v${(versionNumber + 1.0).toFixed(1)}`;
 
-      await tx.bOM.update({
+      await (tx as any).bOM.update({
         where: { id: eco.bomId },
         data: { status: 'ARCHIVED' },
       });
 
-      const newBom = await tx.bOM.create({
+      const newBom = await (tx as any).bOM.create({
         data: {
           productVersionId: currentBom.productVersionId,
           version: newVersionNumber,
@@ -169,7 +169,7 @@ async function applyECOInternal(ecoId: string, userId: string, tx: Prisma.Transa
 
       // Create all final components in new BOM
       for (const [_key, comp] of componentMap.entries()) {
-        await tx.bOMComponent.create({
+        await (tx as any).bOMComponent.create({
           data: {
             bomId: newBom.id,
             productId: comp.productId,
@@ -199,7 +199,7 @@ async function applyECOInternal(ecoId: string, userId: string, tx: Prisma.Transa
 
       // Create all final operations in new BOM
       for (const [_key, op] of operationMap.entries()) {
-        await tx.bOMOperation.create({
+        await (tx as any).bOMOperation.create({
           data: {
             bomId: newBom.id,
             name: op.name,
@@ -218,7 +218,7 @@ async function applyECOInternal(ecoId: string, userId: string, tx: Prisma.Transa
         newBomId: newBom.id,
       };
 
-      await tx.auditLog.create({
+      await (tx as any).auditLog.create({
         data: {
           userId,
           action: AuditAction.VERSION_CREATE,
@@ -231,12 +231,12 @@ async function applyECOInternal(ecoId: string, userId: string, tx: Prisma.Transa
         },
       });
     } else {
-      await tx.bOMComponent.deleteMany({ where: { bomId: eco.bomId } });
-      await tx.bOMOperation.deleteMany({ where: { bomId: eco.bomId } });
+      await (tx as any).bOMComponent.deleteMany({ where: { bomId: eco.bomId } });
+      await (tx as any).bOMOperation.deleteMany({ where: { bomId: eco.bomId } });
 
       const newComponents = draftData.bom?.components || currentBom.components;
       for (const comp of newComponents) {
-        await tx.bOMComponent.create({
+        await (tx as any).bOMComponent.create({
           data: {
             bomId: eco.bomId,
             productId: comp.productId,
@@ -247,7 +247,7 @@ async function applyECOInternal(ecoId: string, userId: string, tx: Prisma.Transa
 
       const newOperations = draftData.bom?.operations || currentBom.operations;
       for (const op of newOperations) {
-        await tx.bOMOperation.create({
+        await (tx as any).bOMOperation.create({
           data: {
             bomId: eco.bomId,
             name: op.name,
@@ -266,14 +266,14 @@ async function applyECOInternal(ecoId: string, userId: string, tx: Prisma.Transa
     }
   }
 
-  await tx.eCO.update({
+  await (tx as any).eCO.update({
     where: { id: ecoId },
     data: {
       status: ECOStatus.APPLIED,
     },
   });
 
-  await tx.auditLog.create({
+  await (tx as any).auditLog.create({
     data: {
       userId,
       action: AuditAction.UPDATE,
@@ -638,7 +638,7 @@ export const reviewECO = async (req: Request, res: Response): Promise<void> => {
     const allStages = await prisma.approvalStage.findMany({ orderBy: { order: 'asc' } });
     
     // Get current stage
-    const currentStage = allStages.find(s => s.name === eco.currentStage);
+    const currentStage = allStages.find((s: { name: string; id: string }) => s.name === eco.currentStage);
 
     if (!currentStage) {
       console.error(`❌ Invalid approval stage: ECO ${id} has currentStage="${eco.currentStage}" which doesn't exist in approval_stages table`);
@@ -652,18 +652,18 @@ export const reviewECO = async (req: Request, res: Response): Promise<void> => {
     // FULL APPROVAL MODE: Approve all remaining stages at once
     if (fullApproval && approved) {
       const result = await prisma.$transaction(async (tx) => {
-        const currentStageIndex = allStages.findIndex(s => s.id === currentStage.id);
+        const currentStageIndex = allStages.findIndex((s: { id: string }) => s.id === currentStage.id);
         const remainingStages = allStages.slice(currentStageIndex);
         
         // Create approval records for all remaining stages
         for (const stage of remainingStages) {
           // Skip if approval already exists for this stage
-          const existingApproval = await tx.eCOApproval.findFirst({
+          const existingApproval = await (tx as any).eCOApproval.findFirst({
             where: { ecoId: id, stageId: stage.id }
           });
           
           if (!existingApproval) {
-            await tx.eCOApproval.create({
+            await (tx as any).eCOApproval.create({
               data: {
                 ecoId: id,
                 stageId: stage.id,
@@ -677,7 +677,7 @@ export const reviewECO = async (req: Request, res: Response): Promise<void> => {
         }
 
         // Create audit log for full approval
-        await tx.auditLog.create({
+        await (tx as any).auditLog.create({
           data: {
             action: AuditAction.APPROVE,
             entityType: EntityType.ECO_APPROVAL,
@@ -695,7 +695,7 @@ export const reviewECO = async (req: Request, res: Response): Promise<void> => {
         const finalStage = allStages[allStages.length - 1];
 
         // Update ECO to final stage and APPROVED status
-        await tx.eCO.update({
+        await (tx as any).eCO.update({
           where: { id },
           data: {
             currentStage: finalStage.name,
@@ -706,7 +706,7 @@ export const reviewECO = async (req: Request, res: Response): Promise<void> => {
         // Auto-apply the ECO
         const appliedResult = await applyECOInternal(id, userId, tx);
 
-        await tx.auditLog.create({
+        await (tx as any).auditLog.create({
           data: {
             action: AuditAction.UPDATE,
             entityType: EntityType.ECO,
@@ -748,7 +748,7 @@ export const reviewECO = async (req: Request, res: Response): Promise<void> => {
     // CRITICAL FIX: Wrap entire review process in transaction
     const result = await prisma.$transaction(async (tx) => {
       // Create approval record
-      await tx.eCOApproval.create({
+      await (tx as any).eCOApproval.create({
         data: {
           ecoId: id,
           stageId: currentStage.id,
@@ -760,7 +760,7 @@ export const reviewECO = async (req: Request, res: Response): Promise<void> => {
       });
 
       // CRITICAL FIX: Add audit log for approval/rejection
-      await tx.auditLog.create({
+      await (tx as any).auditLog.create({
         data: {
           action: approved ? AuditAction.APPROVE : AuditAction.REJECT,
           entityType: EntityType.ECO_APPROVAL,
@@ -779,13 +779,13 @@ export const reviewECO = async (req: Request, res: Response): Promise<void> => {
 
       if (approved) {
         // Check if this is the last stage
-        const stages = await tx.approvalStage.findMany({ orderBy: { order: 'asc' } });
-        const currentStageIndex = stages.findIndex((s) => s.id === currentStage.id);
+        const stages = await (tx as any).approvalStage.findMany({ orderBy: { order: 'asc' } });
+        const currentStageIndex = stages.findIndex((s: { id: string }) => s.id === currentStage.id);
 
         if (currentStageIndex < stages.length - 1) {
           // Move to next stage
           const nextStage = stages[currentStageIndex + 1];
-          await tx.eCO.update({
+          await (tx as any).eCO.update({
             where: { id },
             data: {
               currentStage: nextStage.name,
@@ -793,7 +793,7 @@ export const reviewECO = async (req: Request, res: Response): Promise<void> => {
           });
 
           // CRITICAL FIX: Add audit log for stage transition
-          await tx.auditLog.create({
+          await (tx as any).auditLog.create({
             data: {
               action: AuditAction.STAGE_TRANSITION,
               entityType: EntityType.ECO,
@@ -811,7 +811,7 @@ export const reviewECO = async (req: Request, res: Response): Promise<void> => {
         } else {
           // CRITICAL FIX: Final stage reached - auto-apply ECO
           // First set status to APPROVED
-          await tx.eCO.update({
+          await (tx as any).eCO.update({
             where: { id },
             data: { status: ECOStatus.APPROVED },
           });
@@ -821,7 +821,7 @@ export const reviewECO = async (req: Request, res: Response): Promise<void> => {
             appliedEcoResult = await applyECOInternal(id, userId, tx);
             newStatus = ECOStatus.APPLIED;
 
-            await tx.auditLog.create({
+            await (tx as any).auditLog.create({
               data: {
                 action: AuditAction.UPDATE,
                 entityType: EntityType.ECO,
@@ -839,7 +839,7 @@ export const reviewECO = async (req: Request, res: Response): Promise<void> => {
         }
       } else {
         // Rejected
-        await tx.eCO.update({
+        await (tx as any).eCO.update({
           where: { id },
           data: { status: ECOStatus.REJECTED },
         });
