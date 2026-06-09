@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useNotifications } from '../context/NotificationContext';
 import { roleRequestApi, type RoleRequest } from '../api/roleRequest.api';
 import { Button } from '../components/ui/Button';
-import { Modal } from '../components/ui/Modal';
-import { Shield, Plus, Clock, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
+import { Shield, Clock, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const AVAILABLE_ROLES = [
@@ -16,57 +16,25 @@ const AVAILABLE_ROLES = [
 export const RoleRequestPage = () => {
   const { user } = useAuth();
   const { addNotification } = useNotifications();
+  const navigate = useNavigate();
   const [myRequests, setMyRequests] = useState<RoleRequest[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showRequestModal, setShowRequestModal] = useState(false);
-  const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
-  const [reason, setReason] = useState('');
-  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     loadMyRequests();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadMyRequests = async () => {
     try {
       const requests = await roleRequestApi.getMyRequests();
       setMyRequests(requests);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Failed to load role requests:', error);
       addNotification('error', 'Failed to load your role requests');
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleSubmitRequest = async () => {
-    if (selectedRoles.length === 0) {
-      addNotification('error', 'Please select at least one role');
-      return;
-    }
-
-    setSubmitting(true);
-    try {
-      await roleRequestApi.create({
-        requestedRoles: selectedRoles,
-        reason: reason.trim() || undefined,
-      });
-      addNotification('success', 'Role request submitted successfully');
-      setShowRequestModal(false);
-      setSelectedRoles([]);
-      setReason('');
-      loadMyRequests();
-    } catch (error: any) {
-      addNotification('error', error.response?.data?.message || 'Failed to submit role request');
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const toggleRole = (role: string) => {
-    setSelectedRoles(prev =>
-      prev.includes(role) ? prev.filter(r => r !== role) : [...prev, role]
-    );
   };
 
   // Filter available roles (exclude ADMIN and already assigned)
@@ -121,10 +89,10 @@ export const RoleRequestPage = () => {
           </p>
         </div>
         <Button
-          onClick={() => setShowRequestModal(true)}
+          onClick={() => navigate('/role-requests/create')}
           disabled={hasPendingRequest || availableRolesToRequest.length === 0}
         >
-          <Plus className="w-4 h-4 mr-2" />
+          <Shield className="w-4 h-4 mr-2" />
           Request New Role
         </Button>
       </div>
@@ -229,81 +197,6 @@ export const RoleRequestPage = () => {
           </div>
         )}
       </div>
-
-      {/* Request Modal */}
-      <Modal
-        isOpen={showRequestModal}
-        onClose={() => {
-          setShowRequestModal(false);
-          setSelectedRoles([]);
-          setReason('');
-        }}
-        title="Request Additional Roles"
-      >
-        <div className="space-y-4">
-          <p className="text-zinc-400 text-sm">
-            Select the roles you would like to request. An administrator will review your request.
-          </p>
-
-          {/* Role Selection */}
-          <div className="space-y-3">
-            <label className="text-sm font-medium text-zinc-300">Select Roles</label>
-            {availableRolesToRequest.map(role => (
-              <label
-                key={role.value}
-                className="flex items-start gap-3 p-3 bg-surface/50 border border-white/5 rounded-lg cursor-pointer hover:bg-surface/70 transition-colors"
-              >
-                <input
-                  type="checkbox"
-                  checked={selectedRoles.includes(role.value)}
-                  onChange={() => toggleRole(role.value)}
-                  className="mt-1 w-4 h-4 text-primary bg-zinc-800 border-zinc-700 rounded focus:ring-primary focus:ring-2"
-                />
-                <div className="flex-1">
-                  <div className="text-white font-medium">{role.label}</div>
-                  <div className="text-zinc-400 text-sm">{role.description}</div>
-                </div>
-              </label>
-            ))}
-          </div>
-
-          {/* Reason */}
-          <div>
-            <label className="block text-sm font-medium text-zinc-300 mb-2">
-              Reason (Optional)
-            </label>
-            <textarea
-              value={reason}
-              onChange={e => setReason(e.target.value)}
-              placeholder="Why do you need these roles?"
-              className="w-full px-3 py-2 bg-zinc-900 border border-zinc-800 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-primary"
-              rows={3}
-            />
-          </div>
-
-          {/* Actions */}
-          <div className="flex gap-3 pt-4">
-            <Button
-              onClick={() => {
-                setShowRequestModal(false);
-                setSelectedRoles([]);
-                setReason('');
-              }}
-              variant="secondary"
-              className="flex-1"
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleSubmitRequest}
-              disabled={submitting || selectedRoles.length === 0}
-              className="flex-1"
-            >
-              {submitting ? 'Submitting...' : 'Submit Request'}
-            </Button>
-          </div>
-        </div>
-      </Modal>
     </div>
   );
 };
