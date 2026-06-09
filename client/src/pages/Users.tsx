@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { usersApi, type User } from '../api/users.api';
 import { Button } from '../components/ui/Button';
 import { Search, User as UserIcon, Shield, AlertCircle, CheckCircle } from 'lucide-react';
@@ -8,6 +9,7 @@ import { useAuth } from '../context/AuthContext';
 
 export const UsersPage = () => {
     const { user } = useAuth();
+    const navigate = useNavigate();
     const [users, setUsers] = useState<User[]>([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
@@ -20,6 +22,7 @@ export const UsersPage = () => {
         if (isAdmin) {
             loadUsers();
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [search, isAdmin]);
 
     // Debounce search could be added here, currently relying on effect trigger or manual submit if added
@@ -39,31 +42,8 @@ export const UsersPage = () => {
         }
     };
 
-    const [selectedUser, setSelectedUser] = useState<User | null>(null);
-    const [showRoleModal, setShowRoleModal] = useState(false);
-    const [selectedRole, setSelectedRole] = useState('ENGINEERING');
-
     const handleApproveClick = (user: User) => {
-        setSelectedUser(user);
-        setSelectedRole('ENGINEERING'); // Default
-        setShowRoleModal(true);
-    };
-
-    const confirmApproval = async () => {
-        if (!selectedUser) return;
-
-        try {
-            await usersApi.update(selectedUser.id, {
-                status: 'ACTIVE',
-                role: selectedRole
-            });
-            addNotification('success', 'User approved and activated');
-            setShowRoleModal(false);
-            setSelectedUser(null);
-            loadUsers();
-        } catch (error) {
-            addNotification('error', 'Failed to approve user');
-        }
+        navigate('/users/approve', { state: { user } });
     };
 
     const handleStatusToggle = async (user: User) => {
@@ -80,7 +60,7 @@ export const UsersPage = () => {
             await usersApi.updateStatus(user.id, newStatus);
             addNotification('success', `User ${newStatus === 'ACTIVE' ? 'activated' : 'disabled'} successfully`);
             loadUsers();
-        } catch (error) {
+        } catch {
             addNotification('error', 'Failed to update user status');
         }
     };
@@ -91,7 +71,7 @@ export const UsersPage = () => {
             await usersApi.updateStatus(user.id, 'DISABLED');
             addNotification('success', 'User request rejected');
             loadUsers();
-        } catch (error) {
+        } catch {
             addNotification('error', 'Failed to reject user');
         }
     };
@@ -106,45 +86,7 @@ export const UsersPage = () => {
             )}
 
             {isAdmin && (
-                <div className="space-y-6 relative">
-                    {/* Role Selection Modal */}
-                    {showRoleModal && (
-                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-                            <motion.div
-                                initial={{ opacity: 0, scale: 0.95 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                className="bg-zinc-900 border border-white/10 rounded-xl p-6 w-full max-w-md shadow-xl"
-                            >
-                                <h3 className="text-xl font-bold text-white mb-4">Approve User</h3>
-                                <p className="text-zinc-400 mb-6">
-                                    Select a role for <span className="text-white font-medium">{selectedUser?.name}</span> to activate their account.
-                                </p>
-
-                                <div className="space-y-4 mb-8">
-                                    <div>
-                                        <label className="text-sm font-medium text-zinc-400 block mb-2">Assign Role</label>
-                                        <select
-                                            value={selectedRole}
-                                            onChange={(e) => setSelectedRole(e.target.value)}
-                                            className="w-full bg-zinc-950 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-blue-500"
-                                        >
-                                            <option value="ENGINEERING">Engineering</option>
-                                            <option value="OPERATIONS">Operations</option>
-                                            <option value="APPROVER">Approver</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div className="flex justify-end gap-3">
-                                    <Button variant="ghost" onClick={() => setShowRoleModal(false)}>Cancel</Button>
-                                    <Button onClick={confirmApproval} className="bg-emerald-600 hover:bg-emerald-500 text-white">
-                                        Confirm & Activate
-                                    </Button>
-                                </div>
-                            </motion.div>
-                        </div>
-                    )}
-
+                <div className="space-y-6">
                     <div className="flex justify-between items-center">
                         <div>
                             <h1 className="text-2xl font-bold text-white">User Management</h1>
