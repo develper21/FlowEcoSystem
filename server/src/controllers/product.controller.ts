@@ -177,14 +177,14 @@ export const archiveProduct = async (req: Request, res: Response): Promise<void>
     // CRITICAL FIX: Use transaction for cascading archive
     await prisma.$transaction(async (tx) => {
       // Archive the product
-      await tx.product.update({
+      await (tx as any).product.update({
         where: { id },
         data: { status: 'ARCHIVED' },
       });
 
       // CASCADE: Archive all product versions if requested
       if (cascadeArchive === 'true' || cascadeArchive === true) {
-        await tx.productVersion.updateMany({
+        await (tx as any).productVersion.updateMany({
           where: { 
             productId: id,
             status: { not: 'ARCHIVED' }
@@ -193,14 +193,14 @@ export const archiveProduct = async (req: Request, res: Response): Promise<void>
         });
 
         // CASCADE: Archive all BOMs linked to this product's versions
-        const versions = await tx.productVersion.findMany({
+        const versions = await (tx as any).productVersion.findMany({
           where: { productId: id },
           select: { id: true }
         });
 
-        const versionIds = versions.map(v => v.id);
+        const versionIds = versions.map((v: { id: string }) => v.id);
         if (versionIds.length > 0) {
-          await tx.bOM.updateMany({
+          await (tx as any).bOM.updateMany({
             where: {
               productVersionId: { in: versionIds },
               status: { not: 'ARCHIVED' }
