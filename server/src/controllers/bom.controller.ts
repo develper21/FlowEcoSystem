@@ -25,7 +25,7 @@ export const createBOM = async (req: Request, res: Response): Promise<void> => {
       if (archivedProducts.length > 0) {
         res.status(400).json({
           status: 'error',
-          message: `Cannot use archived products in BOM: ${archivedProducts.map(p => p.name).join(', ')}`,
+          message: `Cannot use archived products in BOM: ${archivedProducts.map((p: { name: string }) => p.name).join(', ')}`,
         });
         return;
       }
