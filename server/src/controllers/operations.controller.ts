@@ -213,7 +213,7 @@ export const getActiveMatrix = async (_req: Request, res: Response): Promise<voi
       orderBy: { name: 'asc' },
     });
 
-    const matrix = activeProducts.map(product => ({
+    const matrix = activeProducts.map((product: { id: string; name: string; status: string; currentVersion: any }) => ({
       productId: product.id,
       productName: product.name,
       productStatus: product.status,
@@ -223,7 +223,7 @@ export const getActiveMatrix = async (_req: Request, res: Response): Promise<voi
         salePrice: product.currentVersion.salePrice,
         costPrice: product.currentVersion.costPrice,
         status: product.currentVersion.status,
-        activeBOMs: product.currentVersion.boms.map(bom => ({
+        activeBOMs: product.currentVersion.boms.map((bom: { id: string; version: string; status: string; _count: { components: number; operations: number } }) => ({
           bomId: bom.id,
           bomVersion: bom.version,
           bomStatus: bom.status,
@@ -239,7 +239,7 @@ export const getActiveMatrix = async (_req: Request, res: Response): Promise<voi
         matrix,
         summary: {
           totalActiveProducts: matrix.length,
-          totalActiveBOMs: matrix.reduce((sum, p) => sum + (p.currentVersion?.activeBOMs.length || 0), 0),
+          totalActiveBOMs: matrix.reduce((sum: number, p: any) => sum + (p.currentVersion?.activeBOMs?.length || 0), 0),
         },
       },
     });
