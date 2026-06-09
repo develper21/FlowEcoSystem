@@ -1,4 +1,3 @@
-
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -60,9 +59,7 @@ export const AppLayout = () => {
             {/* Sidebar */}
             <aside className="w-64 border-r border-white/5 bg-surface/30 backdrop-blur-md flex flex-col z-20">
                 <div className="p-6 flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg shadow-primary/20">
-                        <div className="w-3 h-3 bg-white rounded-full" />
-                    </div>
+                    <img src="/favicon.svg" alt="ECOFlow" className="w-8 h-8" />
                     <span className="font-bold text-lg tracking-tight">ECOFlow</span>
                 </div>
 
