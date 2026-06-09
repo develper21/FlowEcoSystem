@@ -24,7 +24,6 @@ export const BOMDetail = () => {
     const [searchQuery, setSearchQuery] = useState('');
 
     const isEngineering = user?.roles?.includes('ENGINEERING') || user?.roles?.includes('ADMIN');
-    const isOperations = user?.roles?.includes('OPERATIONS');
     const canEdit = isEngineering && (bom?.status === 'DRAFT' || bom?.status === 'ACTIVE');
 
     useEffect(() => {
@@ -77,9 +76,10 @@ export const BOMDetail = () => {
             setSearchQuery('');
             setShowAddComponent(false);
             loadBOM(bom.id);
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error('Failed to add component', error);
-            alert(error?.response?.data?.message || 'Failed to add component');
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            alert((error as any)?.response?.data?.message || 'Failed to add component');
         }
     };
 
@@ -119,9 +119,10 @@ export const BOMDetail = () => {
             setNewOperation({ name: '', workCenter: '', time: 0, sequence: 0 });
             setShowAddOperation(false);
             loadBOM(bom.id);
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error('Failed to add operation', error);
-            alert(error?.response?.data?.message || 'Failed to add operation');
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            alert((error as any)?.response?.data?.message || 'Failed to add operation');
         }
     };
 
@@ -159,9 +160,10 @@ export const BOMDetail = () => {
             await bomsApi.publish(bom.id);
             alert('✅ BOM published successfully!');
             await loadBOM(bom.id);
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error('Failed to publish BOM', error);
-            alert('❌ ' + (error?.response?.data?.message || 'Failed to publish BOM'));
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            alert('❌ ' + ((error as any)?.response?.data?.message || 'Failed to publish BOM'));
         } finally {
             setIsPublishing(false);
         }
