@@ -6,6 +6,7 @@ export interface BOMComponent {
     quantity: number;
     product?: {
         name: string;
+        status: string;
     };
 }
 
@@ -42,22 +43,27 @@ export interface BOM {
 
 export const bomsApi = {
     getAll: async () => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const response = await api.get<any>('/boms');
         return response.data.data?.boms || [];
     },
     getById: async (id: string) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const response = await api.get<any>(`/boms/${id}`);
         return response.data.data?.bom || null;
     },
     create: async (data: Partial<BOM>) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const response = await api.post<any>('/boms', data);
         return response.data.data?.bom;
     },
     update: async (id: string, data: Partial<BOM>) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const response = await api.put<any>(`/boms/${id}`, data);
         return response.data.data?.bom;
     },
     addComponent: async (bomId: string, data: Partial<BOMComponent>) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const response = await api.post<any>(`/boms/${bomId}/components`, data);
         return response.data.data?.component;
     },
@@ -65,6 +71,7 @@ export const bomsApi = {
         await api.delete(`/boms/${bomId}/components/${componentId}`);
     },
     addOperation: async (bomId: string, data: Partial<BOMOperation>) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const response = await api.post<any>(`/boms/${bomId}/operations`, data);
         return response.data.data?.operation;
     },
@@ -72,6 +79,7 @@ export const bomsApi = {
         await api.delete(`/boms/${bomId}/operations/${operationId}`);
     },
     publish: async (bomId: string) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const response = await api.post<any>(`/boms/${bomId}/publish`);
         return response.data.data?.bom;
     }
