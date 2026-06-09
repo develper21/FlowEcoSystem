@@ -55,7 +55,7 @@ export const streamEvents = (req: any, res: Response): void => {
       userId,
       read: false,
     },
-  }).then((count) => {
+  }).then((count: number) => {
     res.write(`data: ${JSON.stringify({ type: 'unread_count', count })}\n\n`);
   });
 
@@ -149,7 +149,7 @@ export const broadcastNotificationHandler = async (req: any, res: Response): Pro
 
     // Create notifications for all users
     await Promise.all(
-      users.map((user) =>
+      users.map((user: { id: string }) =>
         prisma.notification.create({
           data: {
             type: type as any,
