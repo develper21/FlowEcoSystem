@@ -1,18 +1,18 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import { bomsApi } from '../api/boms.api';
 import type { BOM } from '../api/boms.api';
 import { operationsApi } from '../api/operations.api';
-import { Plus, Layers, Settings } from 'lucide-react';
+import { Plus, Layers } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { CreateBOMModal } from '../components/forms/CreateBOMModal';
 import { useAuth } from '../context/AuthContext';
 
 export const BOMPage = () => {
+    const navigate = useNavigate();
     const { user } = useAuth();
     const [boms, setBoms] = useState<BOM[]>([]);
     const [loading, setLoading] = useState(true);
-    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
     const isEngineering = user?.roles?.includes('ENGINEERING') || user?.roles?.includes('ADMIN');
     const isOperations = user?.roles?.includes('OPERATIONS');
@@ -47,18 +47,12 @@ export const BOMPage = () => {
                     <p className="text-zinc-400">Manage BOMs and manufacturing operations</p>
                 </div>
                 {isEngineering && (
-                    <Button className="flex items-center gap-2" onClick={() => setIsCreateModalOpen(true)}>
+                    <Button className="flex items-center gap-2" onClick={() => navigate('/boms/create')}>
                         <Plus className="w-4 h-4" />
                         Create BOM
                     </Button>
                 )}
             </div>
-
-            <CreateBOMModal
-                isOpen={isCreateModalOpen}
-                onClose={() => setIsCreateModalOpen(false)}
-                onSuccess={loadBOMs}
-            />
 
             {loading ? (
                 <div className="text-zinc-500">Loading BOMs...</div>
