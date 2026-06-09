@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { authApi } from '../api/auth.api';
 import { useNotifications } from '../context/NotificationContext';
 import { Button } from '../components/ui/Button';
-import { Lock, User, Save, RefreshCw, Camera } from 'lucide-react';
+import { Lock, User, Save, RefreshCw } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export const SettingsPage = () => {
@@ -53,8 +53,8 @@ export const SettingsPage = () => {
                 setPreviewUrl(response.data.user.avatar || null);
                 addNotification('success', 'Profile updated successfully');
             }
-        } catch (error: any) {
-            addNotification('error', error.message || 'Failed to update profile');
+        } catch (error: unknown) {
+            addNotification('error', error instanceof Error ? error.message : 'Failed to update profile');
         } finally {
             setLoading(false);
         }
@@ -78,8 +78,8 @@ export const SettingsPage = () => {
             setCurrentPassword('');
             setNewPassword('');
             setConfirmPassword('');
-        } catch (error: any) {
-            addNotification('error', error.message || 'Failed to change password');
+        } catch (error: unknown) {
+            addNotification('error', error instanceof Error ? error.message : 'Failed to change password');
         } finally {
             setLoading(false);
         }
