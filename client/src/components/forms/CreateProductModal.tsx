@@ -12,7 +12,6 @@ interface CreateProductModalProps {
 
 export const CreateProductModal = ({ isOpen, onClose, onSuccess }: CreateProductModalProps) => {
     const [name, setName] = useState('');
-    const [version, setVersion] = useState('v1.0');
     const [salePrice, setSalePrice] = useState('');
     const [costPrice, setCostPrice] = useState('');
     const [loading, setLoading] = useState(false);
@@ -42,9 +41,8 @@ export const CreateProductModal = ({ isOpen, onClose, onSuccess }: CreateProduct
             setName('');
             setSalePrice('');
             setCostPrice('');
-            setVersion('v1.0');
-        } catch (err: any) {
-            setError(err.message || 'Failed to create product');
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : 'Failed to create product');
         } finally {
             setLoading(false);
         }
