@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { productsApi } from '../api/products.api';
 import type { Product, ProductVersion } from '../api/products.api';
@@ -33,8 +33,8 @@ export const ProductDetail = () => {
             setProduct(productData || null);
 
             // Extract versions from product data
-            if (productData && (productData as any).versions) {
-                let allVersions = Array.isArray((productData as any).versions) ? (productData as any).versions : [];
+            if (productData && 'versions' in productData && Array.isArray(productData.versions)) {
+                let allVersions = productData.versions;
                 
                 // OPERATIONS ROLE: Filter to show only ACTIVE versions
                 if (isOperations && !isAdmin) {
@@ -239,8 +239,8 @@ export const ProductDetail = () => {
                     entityType="product"
                     entityId={currentVersion.id}
                     entityStatus={currentVersion.status}
-                    canUpload={isEngineering}
-                    canDelete={isEngineering}
+                    canUpload={isEngineering || false}
+                    canDelete={isEngineering || false}
                 />
             )}
         </div>
