@@ -25,8 +25,9 @@ export const LoginPage = () => {
             const response = await api.post('/auth/login', { email, password });
             login(response.data.data.accessToken, response.data.data.user);
             navigate('/dashboard');
-        } catch (err: any) {
-            const msg = err.response?.data?.message || err.message || 'Invalid credentials';
+        } catch (err: unknown) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const msg = (err as any).response?.data?.message || (err as any).message || 'Invalid credentials';
             if (msg.toLowerCase().includes('pending')) {
                 setIsPending(true);
             } else {
@@ -153,54 +154,93 @@ export const LoginPage = () => {
 
             {/* Right Panel - Visualization */}
             <div className="hidden lg:flex flex-1 relative items-center justify-center p-20 z-10 font-sans">
-                <div className="relative w-full h-full max-w-4xl flex items-center justify-center">
-                    {/* Abstract Composition */}
-                    <div className="absolute inset-0 bg-gradient-to-tr from-primary/10 via-transparent to-secondary/10 rounded-3xl blur-3xl" />
-
+                <div className="relative w-full h-full max-w-5xl flex flex-col justify-center space-y-8">
+                    {/* Hero Content */}
                     <motion.div
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ duration: 1, delay: 0.2 }}
-                        className="relative z-10"
+                        initial={{ opacity: 0, y: 30 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.8, delay: 0.3 }}
+                        className="space-y-6"
                     >
-                        <div className="relative w-[600px] h-[400px] glass-card rounded-2xl border border-white/10 p-8 flex flex-col justify-between overflow-hidden">
-                            {/* Decorative Grid */}
-                            <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:40px_40px]" />
+                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20">
+                            <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                            <span className="text-sm font-medium text-primary">Enterprise Engineering Platform</span>
+                        </div>
+                        
+                        <h1 className="text-5xl font-bold text-white leading-tight">
+                            Streamline Your<br />
+                            <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                                Engineering Change Orders
+                            </span>
+                        </h1>
+                        
+                        <p className="text-xl text-zinc-400 max-w-2xl">
+                            Manage product versions, bill of materials, and engineering changes with complete traceability and collaboration.
+                        </p>
+                    </motion.div>
 
-                            {/* Floating Elements */}
-                            <motion.div
-                                animate={{ y: [0, -20, 0] }}
-                                transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-                                className="absolute top-10 right-10 w-24 h-24 rounded-full bg-primary/20 blur-2xl"
-                            />
-
-                            <div className="relative z-10 space-y-6">
-                                <div className="flex gap-4 items-center">
-                                    <div className="w-3 h-3 rounded-full bg-red-500" />
-                                    <div className="w-3 h-3 rounded-full bg-yellow-500" />
-                                    <div className="w-3 h-3 rounded-full bg-green-500" />
-                                </div>
-
-                                <div className="space-y-4">
-                                    <div className="h-8 w-1/3 bg-white/10 rounded-lg animate-pulse" />
-                                    <div className="space-y-2">
-                                        <div className="h-4 w-full bg-white/5 rounded animate-pulse delay-75" />
-                                        <div className="h-4 w-3/4 bg-white/5 rounded animate-pulse delay-100" />
-                                        <div className="h-4 w-5/6 bg-white/5 rounded animate-pulse delay-150" />
-                                    </div>
-                                </div>
-
-                                <div className="flex justify-between items-end">
-                                    <div className="space-y-2">
-                                        <div className="text-sm text-zinc-400">System Status</div>
-                                        <div className="flex items-center gap-2 text-green-400">
-                                            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-                                            Operational
-                                        </div>
-                                    </div>
-                                    <div className="text-6xl font-black text-white/5 select-none">v2.4</div>
-                                </div>
+                    {/* Feature Cards */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 30 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.8, delay: 0.5 }}
+                        className="grid grid-cols-3 gap-6"
+                    >
+                        <div className="glass-card p-6 rounded-xl border border-white/10 space-y-4">
+                            <div className="w-12 h-12 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                                <svg className="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
                             </div>
+                            <div>
+                                <h3 className="text-lg font-semibold text-white">ECO Management</h3>
+                                <p className="text-sm text-zinc-400 mt-1">Track and approve engineering changes</p>
+                            </div>
+                        </div>
+
+                        <div className="glass-card p-6 rounded-xl border border-white/10 space-y-4">
+                            <div className="w-12 h-12 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                                <svg className="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 className="text-lg font-semibold text-white">BOM Control</h3>
+                                <p className="text-sm text-zinc-400 mt-1">Manage bill of materials with precision</p>
+                            </div>
+                        </div>
+
+                        <div className="glass-card p-6 rounded-xl border border-white/10 space-y-4">
+                            <div className="w-12 h-12 rounded-lg bg-violet-500/10 flex items-center justify-center">
+                                <svg className="w-6 h-6 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 className="text-lg font-semibold text-white">Analytics</h3>
+                                <p className="text-sm text-zinc-400 mt-1">Comprehensive reports and insights</p>
+                            </div>
+                        </div>
+                    </motion.div>
+
+                    {/* Stats */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 30 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.8, delay: 0.7 }}
+                        className="flex items-center gap-8 pt-8 border-t border-white/10"
+                    >
+                        <div>
+                            <div className="text-3xl font-bold text-white">99.9%</div>
+                            <div className="text-sm text-zinc-400">Uptime</div>
+                        </div>
+                        <div>
+                            <div className="text-3xl font-bold text-white">500+</div>
+                            <div className="text-sm text-zinc-400">Products Managed</div>
+                        </div>
+                        <div>
+                            <div className="text-3xl font-bold text-white">10K+</div>
+                            <div className="text-sm text-zinc-400">ECOs Processed</div>
                         </div>
                     </motion.div>
                 </div>
