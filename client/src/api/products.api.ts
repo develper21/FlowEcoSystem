@@ -9,6 +9,8 @@ export interface Product {
     updatedAt: string;
     currentVersion?: ProductVersion;
     versions?: ProductVersion[];
+    salePrice?: number;
+    costPrice?: number;
 }
 
 export interface ProductVersion {
@@ -22,10 +24,34 @@ export interface ProductVersion {
     updatedAt: string;
 }
 
+interface ApiResponse<T> {
+    data: {
+        data: T;
+    };
+}
+
+interface ProductsResponse {
+    data: {
+        products: Product[];
+    };
+}
+
+interface ProductResponse {
+    data: {
+        product: Product;
+    };
+}
+
+interface ProductVersionResponse {
+    data: {
+        version: ProductVersion;
+    };
+}
+
 export const productsApi = {
     getAll: async () => {
         try {
-            const response = await api.get<any>('/products');
+            const response = await api.get<ProductsResponse>('/products');
             return response.data.data?.products || [];
         } catch (error) {
             console.error('Failed to fetch products:', error);
@@ -34,7 +60,7 @@ export const productsApi = {
     },
     getById: async (id: string) => {
         try {
-            const response = await api.get<any>(`/products/${id}`);
+            const response = await api.get<ProductResponse>(`/products/${id}`);
             return response.data.data?.product || null;
         } catch (error) {
             console.error('Failed to fetch product:', error);
@@ -42,23 +68,23 @@ export const productsApi = {
         }
     },
     create: async (data: Partial<Product>) => {
-        const response = await api.post<any>('/products', data);
+        const response = await api.post<ProductResponse>('/products', data);
         return response.data.data?.product;
     },
     update: async (id: string, data: Partial<Product>) => {
-        const response = await api.put<any>(`/products/${id}`, data);
+        const response = await api.put<ProductResponse>(`/products/${id}`, data);
         return response.data.data?.product;
     },
     archive: async (id: string) => {
         await api.patch(`/products/${id}/archive`);
     },
     createVersion: async (productId: string, data: Partial<ProductVersion>) => {
-        const response = await api.post<any>(`/products/${productId}/versions`, data);
+        const response = await api.post<ProductVersionResponse>(`/products/${productId}/versions`, data);
         return response.data.data?.version;
     },
     getVersionHistory: async (productId: string) => {
         try {
-            const response = await api.get<any>(`/reports/products/${productId}/version-history`);
+            const response = await api.get<ApiResponse<unknown>>(`/reports/products/${productId}/version-history`);
             return response.data.data || null;
         } catch (error) {
             console.error('Failed to fetch version history:', error);
