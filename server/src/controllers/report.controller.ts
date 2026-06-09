@@ -82,21 +82,21 @@ export const getECOStats = async (_req: Request, res: Response): Promise<void> =
       d.setDate(today.getDate() - i);
       const dateStr = d.toLocaleDateString('en-US', { weekday: 'short' });
 
-      const dayActivity = weeklyActivity.filter(eco =>
+      const dayActivity = weeklyActivity.filter((eco: { createdAt: Date; status: string }) =>
         new Date(eco.createdAt).getDate() === d.getDate()
       );
 
       chartData.push({
         name: dateStr,
-        active: dayActivity.filter(e => e.status !== 'APPROVED' && e.status !== 'REJECTED').length,
-        completed: dayActivity.filter(e => e.status === 'APPROVED').length,
+        active: dayActivity.filter((e: { status: string }) => e.status !== 'APPROVED' && e.status !== 'REJECTED').length,
+        completed: dayActivity.filter((e: { status: string }) => e.status === 'APPROVED').length,
       });
     }
 
     // Process Approval Times (Mocking 'departments' from stages if needed or using stage names)
     // We'll group by Stage Name directly
     const stageTimes: Record<string, { total: number; count: number }> = {};
-    approvalTimes.forEach(approval => {
+    approvalTimes.forEach((approval: { stage: { name: string } }) => {
       const stageName = approval.stage.name;
       // Approximation: Time since creation to approval (This is rough, ideally we track time_in_stage)
       // For now, we'll just send the raw count per stage to show "Load"
@@ -360,7 +360,7 @@ export const getActiveProductMatrix = async (_req: Request, res: Response): Prom
       orderBy: { name: 'asc' },
     });
 
-    const matrix = activeProducts.map(product => ({
+    const matrix = activeProducts.map((product: { id: string; name: string; status: string; currentVersion: any }) => ({
       productId: product.id,
       productName: product.name,
       productStatus: product.status,
@@ -371,7 +371,7 @@ export const getActiveProductMatrix = async (_req: Request, res: Response): Prom
         costPrice: product.currentVersion.costPrice,
         status: product.currentVersion.status,
         createdAt: product.currentVersion.createdAt,
-        activeBOMs: product.currentVersion.boms.map(bom => ({
+        activeBOMs: product.currentVersion.boms.map((bom: { id: string; version: string; status: string; _count: { components: number; operations: number }; createdAt: Date }) => ({
           bomId: bom.id,
           bomVersion: bom.version,
           bomStatus: bom.status,
@@ -385,9 +385,9 @@ export const getActiveProductMatrix = async (_req: Request, res: Response): Prom
     // Calculate summary statistics
     const summary = {
       totalActiveProducts: matrix.length,
-      totalActiveVersions: matrix.filter(p => p.currentVersion !== null).length,
-      totalActiveBOMs: matrix.reduce((sum, p) => sum + (p.currentVersion?.activeBOMs.length || 0), 0),
-      productsWithoutBOMs: matrix.filter(p => p.currentVersion && p.currentVersion.activeBOMs.length === 0).length,
+      totalActiveVersions: matrix.filter((p: any) => p.currentVersion !== null).length,
+      totalActiveBOMs: matrix.reduce((sum: number, p: any) => sum + (p.currentVersion?.activeBOMs?.length || 0), 0),
+      productsWithoutBOMs: matrix.filter((p: any) => p.currentVersion && p.currentVersion.activeBOMs?.length === 0).length,
     };
 
     res.status(200).json({
