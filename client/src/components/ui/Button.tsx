@@ -49,7 +49,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
             >
                 {isLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                 {!isLoading && leftIcon && <span className="mr-2">{leftIcon as React.ReactNode}</span>}
-                {children}
+                {children as React.ReactNode}
                 {!isLoading && rightIcon && <span className="ml-2">{rightIcon as React.ReactNode}</span>}
 
                 {/* Glow effect for primary */}
