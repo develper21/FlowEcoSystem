@@ -1,17 +1,17 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import { ecosApi } from '../api/ecos.api';
 import type { ECO } from '../api/ecos.api';
 import { Plus, GitPullRequest } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { CreateECOModal } from '../components/forms/CreateECOModal';
 import { useAuth } from '../context/AuthContext';
 
 export const ECOPage = () => {
+    const navigate = useNavigate();
     const { user } = useAuth();
     const [ecos, setEcos] = useState<ECO[]>([]);
     const [loading, setLoading] = useState(true);
-    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
     const isEngineering = user?.roles?.includes('ENGINEERING') || user?.roles?.includes('ADMIN');
 
@@ -49,18 +49,12 @@ export const ECOPage = () => {
                     <p className="text-zinc-400">Track and manage engineering changes</p>
                 </div>
                 {isEngineering && (
-                    <Button className="flex items-center gap-2" onClick={() => setIsCreateModalOpen(true)}>
+                    <Button className="flex items-center gap-2" onClick={() => navigate('/ecos/create')}>
                         <Plus className="w-4 h-4" />
                         New ECO
                     </Button>
                 )}
             </div>
-
-            <CreateECOModal
-                isOpen={isCreateModalOpen}
-                onClose={() => setIsCreateModalOpen(false)}
-                onSuccess={loadECOs}
-            />
 
             {loading ? (
                 <div className="text-zinc-500">Loading ECOs...</div>
