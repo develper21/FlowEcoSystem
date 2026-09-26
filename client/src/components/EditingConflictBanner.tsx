@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { AlertTriangle, Users, X } from 'lucide-react';
 import type { EditorInfo } from '../api/editingSession.api';
 import { editingSessionApi } from '../api/editingSession.api';
+import { API_BASE_URL } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 
 interface EditingConflictBannerProps {
@@ -37,7 +38,7 @@ export default function EditingConflictBanner({
         if (!token) return;
 
         const eventSource = new EventSource(
-            `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/notifications/stream`,
+            `${API_BASE_URL}/notifications/stream`,
             { withCredentials: true }
         );
 
