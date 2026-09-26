@@ -3,6 +3,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, CheckCircle, AlertCircle, Info } from 'lucide-react';
 import { useAuth } from './AuthContext';
+import { API_BASE_URL } from '../api/client';
 
 export type NotificationType = 'success' | 'error' | 'info' | 'warning';
 
@@ -48,7 +49,7 @@ export const NotificationProvider = ({ children }: { children: React.ReactNode }
         // Connect to SSE endpoint
         // Connect to SSE endpoint with token
         const token = localStorage.getItem('token');
-        const eventSource = new EventSource(`/api/notifications/stream?token=${token}`);
+        const eventSource = new EventSource(`${API_BASE_URL}/notifications/stream?token=${token}`);
 
         eventSource.onopen = () => {
             console.log('SSE Connected');
