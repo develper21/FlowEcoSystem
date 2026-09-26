@@ -7,6 +7,8 @@ dist/
 
 # Environment variables
 .env
+.env.production
+.env.local
 
 # Uploads
 uploads/
