@@ -1,19 +1,33 @@
 # Netlify configuration — ECOFlow frontend (https://docs.netlify.com/configure-builds/file-based-configuration/)
-# Commit this file at the repo root of the frontend repository (client/ if deploying
-# a monorepo — set "Base directory: client" in the Netlify UI in that case).
+# Commit this file at the repo root. Publish dir is RELATIVE to base ("client").
 
 [build]
-  base = "client"
+  base    = "client"
   command = "npm run build"
   publish = "dist"
 
 [build.environment]
   NODE_VERSION = "20"
-  # Public URL of the deployed backend (Render service URL from render.yaml).
-  # Also set VITE_API_URL in the Netlify UI (Site configuration → Environment variables)
-  # so the notifications SSE stream can reach the API:
+  # Option A (default): "/api" is proxied to the Render backend by the rewrite
+  # below — no env var needed, and SSE/cookies stay same-origin (no CORS).
+  # Option B (direct): set VITE_API_URL in the Netlify UI
+  # (Site configuration → Environment variables), e.g.:
   #   VITE_API_URL = "https://ecoflow-backend.onrender.com/api"
-  VITE_API_URL = "https://ecoflow-backend.onrender.com/api"
+
+# 1) Proxy API requests to the Render backend. MUST come BEFORE the SPA
+#    fallback — redirect rules are evaluated top to bottom, first match wins.
+[[redirects]]
+  from   = "/api/*"
+  to     = "https://ecoflow-backend.onrender.com/api/:splat"
+  status = 200
+  force  = true
+
+# 2) SPA fallback LAST: unknown routes serve index.html so React Router works
+#    on hard refresh. force=false so real files (JS/CSS/images) are served as-is.
+[[redirects]]
+  from   = "/*"
+  to     = "/index.html"
+  status = 200
 
 # Long-term caching for hashed build assets
 [[headers]]
@@ -21,17 +35,11 @@
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
-# Security headers for the SPA
+# Never cache index.html (deploys go live immediately) + security headers
 [[headers]]
   for = "/*"
   [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
     X-Frame-Options = "DENY"
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
-
-# API calls go straight to the backend URL (see VITE_API_URL); SPA fallback LAST
-# so client-side routes like /dashboard render index.html on hard refresh.
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
