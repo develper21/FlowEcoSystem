@@ -1,8 +1,6 @@
 # Render Blueprint — ECOFlow backend (https://render.com/docs/blueprint-spec)
 # Commit this file at the repo root. On the Render dashboard:
 #   New + → Blueprint → pick this repo → Render reads render.yaml and provisions the service.
-# After the first deploy, create the environment variables listed below in the dashboard
-# (they hold secrets that must not be committed, e.g. JWT_SECRET, CLOUDINARY_API_SECRET).
 #
 # NOTE: `prisma generate` is already part of the `build` script in server/package.json,
 # so the Prisma Client is regenerated on every deploy automatically.
@@ -11,25 +9,33 @@ services:
   - type: web
     name: ecoflow-backend
     runtime: node
-    rootDir: server
     plan: free
+    rootDir: server
     region: oregon
     branch: main
+
+    # Installs devDependencies (typescript, @types/*, nodemon…) then compiles.
+    # `npm ci` uses the lockfile for reproducible installs.
     buildCommand: npm ci && npm run build
+
+    # Serve the COMPILED build. Do NOT use `npm run dev` here — nodemon is a
+    # devDependency and does not exist in production (exit 127 in your last log).
     startCommand: npm start
+
     healthCheckPath: /health
     autoDeploy: true
+
     envVars:
       - key: NODE_VERSION
-        value: "20"
+        value: "20"          # match the version you develop with
       - key: NODE_ENV
         value: production
       - key: DATABASE_URL
-        sync: false   # set in dashboard: your Postgres connection string
+        sync: false          # set in dashboard: your Postgres connection string
       - key: JWT_SECRET
-        sync: false   # set in dashboard (secret)
+        sync: false          # set in dashboard (secret)
       - key: REFRESH_TOKEN_SECRET
-        sync: false   # set in dashboard (secret)
+        sync: false          # set in dashboard (secret)
       - key: CLOUDINARY_CLOUD_NAME
         sync: false
       - key: CLOUDINARY_API_KEY
