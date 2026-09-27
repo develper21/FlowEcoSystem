@@ -7,6 +7,7 @@
     "dev": "nodemon src/server.ts",
     "build": "prisma generate && tsc",
     "start": "node dist/server.js",
+    "dev:prod": "node dist/server.js",
     "pm2:start": "npm run build && pm2 start ecosystem.config.js --env production",
     "pm2:dev": "pm2 start ecosystem.config.js --env development",
     "pm2:stop": "pm2 stop ecoflow-backend",
