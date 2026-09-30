@@ -1,0 +1,2381 @@
+{
+  "info": {
+    "_postman_id": "b7e6f2a1-ecoflow-4b3d-9c2a-5f1d8a7e9b01",
+    "name": "ECOFlow API",
+    "description": "Complete API collection for the ECOFlow Engineering Change Order system (backend: Express + Prisma + PostgreSQL).\n\nBase URLs:\n• Local: http://localhost:5000/api\n• Production (Render): https://ecoflow-backend.onrender.com/api\n\n1. Run `POST /auth/signup` then `POST /auth/login` — accessToken is saved automatically.\n2. Requests needing an id (productId, bomId, ecoId, userId, stageId…) use collection variables: copy the id from a GET response into the variable, or set them via a test script.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "host",
+      "value": "http://localhost:5000"
+    },
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000/api"
+    },
+    {
+      "key": "accessToken",
+      "value": ""
+    },
+    {
+      "key": "refreshToken",
+      "value": ""
+    },
+    {
+      "key": "userId",
+      "value": "USER_ID"
+    },
+    {
+      "key": "productId",
+      "value": "PRODUCT_ID"
+    },
+    {
+      "key": "productVersionId",
+      "value": "PRODUCT_VERSION_ID"
+    },
+    {
+      "key": "bomId",
+      "value": "BOM_ID"
+    },
+    {
+      "key": "bomComponentId",
+      "value": "BOM_COMPONENT_ID"
+    },
+    {
+      "key": "bomOperationId",
+      "value": "BOM_OPERATION_ID"
+    },
+    {
+      "key": "ecoId",
+      "value": "ECO_ID"
+    },
+    {
+      "key": "ecoDraftComponentId",
+      "value": "ECO_DRAFT_COMPONENT_ID"
+    },
+    {
+      "key": "ecoDraftOperationId",
+      "value": "ECO_DRAFT_OPERATION_ID"
+    },
+    {
+      "key": "attachmentId",
+      "value": "ATTACHMENT_ID"
+    },
+    {
+      "key": "stageId",
+      "value": "STAGE_ID"
+    },
+    {
+      "key": "notificationId",
+      "value": "NOTIFICATION_ID"
+    },
+    {
+      "key": "roleRequestId",
+      "value": "ROLE_REQUEST_ID"
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "description": "Signup, login, token refresh, profile & password management.",
+      "item": [
+        {
+          "name": "Signup",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/signup",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "signup"
+              ]
+            },
+            "description": "Register a new user. New users start in PENDING status until an ADMIN approves them.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Narvin Kumar\",\n  \"email\": \"engineer@ecoflow.dev\",\n  \"password\": \"Password@123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 2xx', () => pm.expect(pm.response.code).to.be.below(300));",
+                  "try {",
+                  "  const body = pm.response.json();",
+                  "  const d = body.data || body;",
+                  "  const at = d.accessToken || d.access_token || d.token;",
+                  "  const rt = d.refreshToken || d.refresh_token;",
+                  "  if (at) pm.collectionVariables.set('accessToken', at);",
+                  "  if (rt) pm.collectionVariables.set('refreshToken', rt);",
+                  "} catch (e) {}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Authenticate and receive accessToken + refreshToken (auto-saved to collection variables).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"engineer@ecoflow.dev\",\n  \"password\": \"Password@123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 2xx', () => pm.expect(pm.response.code).to.be.below(300));",
+                  "try {",
+                  "  const body = pm.response.json();",
+                  "  const d = body.data || body;",
+                  "  const at = d.accessToken || d.access_token || d.token;",
+                  "  const rt = d.refreshToken || d.refresh_token;",
+                  "  if (at) pm.collectionVariables.set('accessToken', at);",
+                  "  if (rt) pm.collectionVariables.set('refreshToken', rt);",
+                  "} catch (e) {}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/refresh",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "refresh"
+              ]
+            },
+            "description": "Exchange a valid refresh token for a new access token.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 2xx', () => pm.expect(pm.response.code).to.be.below(300));",
+                  "try {",
+                  "  const body = pm.response.json();",
+                  "  const d = body.data || body;",
+                  "  const at = d.accessToken || d.access_token || d.token;",
+                  "  const rt = d.refreshToken || d.refresh_token;",
+                  "  if (at) pm.collectionVariables.set('accessToken', at);",
+                  "  if (rt) pm.collectionVariables.set('refreshToken', rt);",
+                  "} catch (e) {}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/logout",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "logout"
+              ]
+            },
+            "description": "Revoke the provided refresh token.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "Get Me",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "me"
+              ]
+            },
+            "description": "Current authenticated user profile with roles."
+          }
+        },
+        {
+          "name": "Change Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/change-password",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "change-password"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentPassword\": \"Password@123\",\n  \"newPassword\": \"NewPassword@456\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Update Profile (multipart)",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "profile"
+              ]
+            },
+            "description": "Update profile. multipart/form-data — avatar is optional.",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "name",
+                  "value": "Narvin K",
+                  "type": "text"
+                },
+                {
+                  "key": "email",
+                  "value": "engineer@ecoflow.dev",
+                  "type": "text"
+                },
+                {
+                  "key": "avatar",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "description": "Admin user management: list, update, status, password reset, delete.",
+      "item": [
+        {
+          "name": "Get All Users",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "search",
+                  "value": ""
+                },
+                {
+                  "key": "status",
+                  "value": "ACTIVE"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get User By Id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/{{userId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "{{userId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update User",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/{{userId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "{{userId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Name\",\n  \"role\": \"ENGINEERING\",\n  \"email\": \"engineer@ecoflow.dev\",\n  \"status\": \"ACTIVE\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Update User Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/{{userId}}/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "{{userId}}",
+                "status"
+              ]
+            },
+            "description": "ACTIVE / SUSPENDED — suspending forces logout on next request.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"ACTIVE\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Reset User Password",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/{{userId}}/password",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "{{userId}}",
+                "password"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"newPassword\": \"Reset@12345\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Delete User",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/{{userId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "{{userId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Roles",
+      "description": "Assign / add / remove roles (ENGINEERING, APPROVER, OPERATIONS, ADMIN).",
+      "item": [
+        {
+          "name": "Assign Roles (replace all)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/roles/users/{{userId}}/roles",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "roles",
+                "users",
+                "{{userId}}",
+                "roles"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"roles\": [\n    \"ENGINEERING\",\n    \"APPROVER\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Add Single Role",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/roles/users/{{userId}}/roles",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "roles",
+                "users",
+                "{{userId}}",
+                "roles"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"role\": \"OPERATIONS\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Remove Role",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/roles/users/{{userId}}/roles",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "roles",
+                "users",
+                "{{userId}}",
+                "roles"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"role\": \"OPERATIONS\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Get User Roles",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/roles/users/{{userId}}/roles",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "roles",
+                "users",
+                "{{userId}}",
+                "roles"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Products",
+      "description": "Product master data and version history.",
+      "item": [
+        {
+          "name": "Create Product",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/products",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Eco Pump X100\",\n  \"salePrice\": 499.99,\n  \"costPrice\": 320.5\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Get All Products",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/products",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "search",
+                  "value": "pump"
+                },
+                {
+                  "key": "status",
+                  "value": "ACTIVE"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Product By Id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/products/{{productId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products",
+                "{{productId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Product",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/products/{{productId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products",
+                "{{productId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Eco Pump X100 (rev B)\",\n  \"salePrice\": 529.99,\n  \"costPrice\": 330\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Create Product Version",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/products/{{productId}}/versions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products",
+                "{{productId}}",
+                "versions"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Eco Pump X100 v2\",\n  \"salePrice\": 549.99,\n  \"costPrice\": 340\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Update Product Version",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/products/versions/{{productVersionId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products",
+                "versions",
+                "{{productVersionId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Eco Pump X100 v2.1\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Archive Product",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/products/{{productId}}/archive",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products",
+                "{{productId}}",
+                "archive"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Product",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/products/{{productId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products",
+                "{{productId}}"
+              ]
+            },
+            "description": "ADMIN only."
+          }
+        }
+      ]
+    },
+    {
+      "name": "BOMs",
+      "description": "Bill of Materials: versions, components and operations.",
+      "item": [
+        {
+          "name": "Create BOM",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/boms",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "boms"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productVersionId\": \"{{productVersionId}}\",\n  \"version\": \"1.0\",\n  \"components\": [],\n  \"operations\": []\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Get All BOMs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/boms",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "boms"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "status",
+                  "value": "DRAFT"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get BOM By Id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/boms/{{bomId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "boms",
+                "{{bomId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update BOM",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/boms/{{bomId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "boms",
+                "{{bomId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"version\": \"1.1\",\n  \"status\": \"DRAFT\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Publish BOM",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/boms/{{bomId}}/publish",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "boms",
+                "{{bomId}}",
+                "publish"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Add Component",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/boms/{{bomId}}/components",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "boms",
+                "{{bomId}}",
+                "components"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": \"{{productId}}\",\n  \"quantity\": 4\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Remove Component",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/boms/{{bomId}}/components/{{bomComponentId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "boms",
+                "{{bomId}}",
+                "components",
+                "{{bomComponentId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Add Operation",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/boms/{{bomId}}/operations",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "boms",
+                "{{bomId}}",
+                "operations"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Assembly\",\n  \"time\": 45,\n  \"workCenter\": \"WC-01\",\n  \"sequence\": 10\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Remove Operation",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/boms/{{bomId}}/operations/{{bomOperationId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "boms",
+                "{{bomId}}",
+                "operations",
+                "{{bomOperationId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "ECOs",
+      "description": "Engineering Change Orders: full lifecycle DRAFT → IN_REVIEW → APPROVED → APPLIED.",
+      "item": [
+        {
+          "name": "Create ECO",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/ecos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ecos"
+              ]
+            },
+            "description": "type: COMPONENT_CHANGE | OPERATION_CHANGE | GENERAL. versionUpdate: MINOR | MAJOR.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Increase pump impeller qty\",\n  \"type\": \"COMPONENT_CHANGE\",\n  \"productId\": \"{{productId}}\",\n  \"bomId\": \"{{bomId}}\",\n  \"draftData\": {\n    \"reason\": \"Field failures at high load\"\n  },\n  \"effectiveDate\": \"2026-11-01\",\n  \"versionUpdate\": \"MINOR\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Get All ECOs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/ecos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ecos"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "status",
+                  "value": "DRAFT"
+                },
+                {
+                  "key": "type",
+                  "value": "COMPONENT_CHANGE"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get ECO By Id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/ecos/{{ecoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ecos",
+                "{{ecoId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update ECO",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/ecos/{{ecoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ecos",
+                "{{ecoId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Increase pump impeller qty (rev 2)\",\n  \"draftData\": {\n    \"reason\": \"Updated after review\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Submit ECO for Review",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/ecos/{{ecoId}}/submit",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ecos",
+                "{{ecoId}}",
+                "submit"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Review ECO",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/ecos/{{ecoId}}/review",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ecos",
+                "{{ecoId}}",
+                "review"
+              ]
+            },
+            "description": "APPROVER/ADMIN. approved=true moves to the next approval stage; fullApproval=true approves all stages at once.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"approved\": true,\n  \"comments\": \"LGTM — verify cost impact\",\n  \"fullApproval\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Apply ECO",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/ecos/{{ecoId}}/apply",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ecos",
+                "{{ecoId}}",
+                "apply"
+              ]
+            },
+            "description": "ADMIN only — applies approved changes to the live BOM/product version."
+          }
+        },
+        {
+          "name": "ECO Draft Components",
+          "description": "Draft component lines inside an ECO (ADD / UPDATE / DELETE).",
+          "item": [
+            {
+              "name": "Add Draft Component",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/ecos/{{ecoId}}/draft/components",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "ecos",
+                    "{{ecoId}}",
+                    "draft",
+                    "components"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"productId\": \"{{productId}}\",\n  \"quantity\": 6,\n  \"changeType\": \"UPDATE\",\n  \"originalComponentId\": \"{{bomComponentId}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "name": "Update Draft Component",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/ecos/{{ecoId}}/draft/components/{{ecoDraftComponentId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "ecos",
+                    "{{ecoId}}",
+                    "draft",
+                    "components",
+                    "{{ecoDraftComponentId}}"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"quantity\": 8,\n  \"changeType\": \"UPDATE\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "name": "Remove Draft Component",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/ecos/{{ecoId}}/draft/components/{{ecoDraftComponentId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "ecos",
+                    "{{ecoId}}",
+                    "draft",
+                    "components",
+                    "{{ecoDraftComponentId}}"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "ECO Draft Operations",
+          "description": "Draft operation lines inside an ECO (ADD / UPDATE / DELETE).",
+          "item": [
+            {
+              "name": "Add Draft Operation",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/ecos/{{ecoId}}/draft/operations",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "ecos",
+                    "{{ecoId}}",
+                    "draft",
+                    "operations"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Pressure Test\",\n  \"time\": 20,\n  \"workCenter\": \"WC-03\",\n  \"sequence\": 30,\n  \"changeType\": \"ADD\",\n  \"originalOperationId\": \"{{bomOperationId}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "name": "Update Draft Operation",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/ecos/{{ecoId}}/draft/operations/{{ecoDraftOperationId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "ecos",
+                    "{{ecoId}}",
+                    "draft",
+                    "operations",
+                    "{{ecoDraftOperationId}}"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"time\": 25,\n  \"changeType\": \"UPDATE\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "name": "Remove Draft Operation",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/ecos/{{ecoId}}/draft/operations/{{ecoDraftOperationId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "ecos",
+                    "{{ecoId}}",
+                    "draft",
+                    "operations",
+                    "{{ecoDraftOperationId}}"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Attachments",
+      "description": "File uploads (multipart/form-data, field name: file) stored on Cloudinary.",
+      "item": [
+        {
+          "name": "Upload Product Attachment",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/products/{{productId}}/attachments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products",
+                "{{productId}}",
+                "attachments"
+              ]
+            },
+            "description": "ENGINEERING/ADMIN. Send multipart form-data with a file field.",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Product Attachments",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/products/{{productId}}/attachments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products",
+                "{{productId}}",
+                "attachments"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Product Attachment",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/products/attachments/{{attachmentId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products",
+                "attachments",
+                "{{attachmentId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Upload ECO Attachment",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/ecos/{{ecoId}}/attachments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ecos",
+                "{{ecoId}}",
+                "attachments"
+              ]
+            },
+            "description": "ENGINEERING/ADMIN, DRAFT ECOs only.",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get ECO Attachments",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/ecos/{{ecoId}}/attachments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ecos",
+                "{{ecoId}}",
+                "attachments"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete ECO Attachment",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/ecos/attachments/{{attachmentId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ecos",
+                "attachments",
+                "{{attachmentId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reports",
+      "description": "Audit logs, ECO statistics, version history, archived products.",
+      "item": [
+        {
+          "name": "Get Audit Logs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/reports/audit-logs",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reports",
+                "audit-logs"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "50"
+                }
+              ]
+            },
+            "description": "ADMIN only."
+          }
+        },
+        {
+          "name": "Get ECO Stats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/reports/eco-stats",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reports",
+                "eco-stats"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Product Version History",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/reports/products/{{productId}}/version-history",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reports",
+                "products",
+                "{{productId}}",
+                "version-history"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get BOM Change History",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/reports/product-versions/{{productVersionId}}/bom-history",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reports",
+                "product-versions",
+                "{{productVersionId}}",
+                "bom-history"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Archived Products",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/reports/archived-products",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reports",
+                "archived-products"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Active Product Matrix",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/reports/active-matrix",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reports",
+                "active-matrix"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Comparison",
+      "description": "Diff ECO changes and compare BOM versions.",
+      "item": [
+        {
+          "name": "Get ECO Comparison",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/comparison/ecos/{{ecoId}}/comparison",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "comparison",
+                "ecos",
+                "{{ecoId}}",
+                "comparison"
+              ]
+            },
+            "description": "Before/after diff of the ECO’s draft vs the live BOM."
+          }
+        },
+        {
+          "name": "Get Product Version History",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/comparison/products/{{productId}}/versions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "comparison",
+                "products",
+                "{{productId}}",
+                "versions"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Compare BOM Versions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/comparison/boms/{{bomId}}/comparison/1.0/1.1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "comparison",
+                "boms",
+                "{{bomId}}",
+                "comparison",
+                "1.0",
+                "1.1"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Operations",
+      "description": "Read-only views for the OPERATIONS role (active/published data).",
+      "item": [
+        {
+          "name": "Get Active Products",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/operations/products",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "operations",
+                "products"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Active BOMs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/operations/boms",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "operations",
+                "boms"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Active Product By Id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/operations/products/{{productId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "operations",
+                "products",
+                "{{productId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Active BOM By Id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/operations/boms/{{bomId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "operations",
+                "boms",
+                "{{bomId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Active Matrix",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/operations/active-matrix",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "operations",
+                "active-matrix"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Notifications",
+      "description": "Real-time (SSE) notifications: stream, read state, admin broadcast.",
+      "item": [
+        {
+          "name": "SSE Stream (EventSource)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/notifications/stream",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "notifications",
+                "stream"
+              ]
+            },
+            "description": "Server-Sent Events stream. Auth via ?token=<accessToken> query param (EventSource cannot set headers). Open in a browser or SSE client."
+          }
+        },
+        {
+          "name": "Get My Notifications",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/notifications",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "notifications"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "unreadOnly",
+                  "value": "false"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Mark As Read",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/notifications/{{notificationId}}/read",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "notifications",
+                "{{notificationId}}",
+                "read"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Mark All As Read",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/notifications/read-all",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "notifications",
+                "read-all"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Notification",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/notifications/{{notificationId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "notifications",
+                "{{notificationId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Broadcast Notification (ADMIN)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/notifications/broadcast",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "notifications",
+                "broadcast"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"info\",\n  \"title\": \"Maintenance window\",\n  \"message\": \"API maintenance tonight at 22:00 UTC\",\n  \"data\": {\n    \"severity\": \"low\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Notify Single User (ADMIN)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/notifications/users/{{userId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "notifications",
+                "users",
+                "{{userId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"warning\",\n  \"title\": \"Role updated\",\n  \"message\": \"Your roles were updated by an admin\",\n  \"data\": {}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Settings",
+      "description": "ECO approval-stage configuration (ADMIN).",
+      "item": [
+        {
+          "name": "Get All Stages",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/settings/stages",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "settings",
+                "stages"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Stage By Id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/settings/stages/{{stageId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "settings",
+                "stages",
+                "{{stageId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Stage",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/settings/stages",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "settings",
+                "stages"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Quality Review\",\n  \"order\": 2,\n  \"requiresApproval\": true,\n  \"isFinal\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Update Stage",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/settings/stages/{{stageId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "settings",
+                "stages",
+                "{{stageId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Quality Review\",\n  \"order\": 2,\n  \"requiresApproval\": true,\n  \"isFinal\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Delete Stage",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/settings/stages/{{stageId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "settings",
+                "stages",
+                "{{stageId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Next Stage",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/settings/stages/next/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "settings",
+                "stages",
+                "next",
+                "1"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Role Requests",
+      "description": "Users request extra roles; ADMIN approves/rejects.",
+      "item": [
+        {
+          "name": "Create Role Request",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/role-requests",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "role-requests"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"requestedRoles\": [\n    \"APPROVER\"\n  ],\n  \"reason\": \"Need to review ECOs for my product line\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Get My Role Requests",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/role-requests/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "role-requests",
+                "me"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All Role Requests (ADMIN)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/role-requests/admin/all",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "role-requests",
+                "admin",
+                "all"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "PENDING"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Approve Role Request (ADMIN)",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/role-requests/admin/{{roleRequestId}}/approve",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "role-requests",
+                "admin",
+                "{{roleRequestId}}",
+                "approve"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Reject Role Request (ADMIN)",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/role-requests/admin/{{roleRequestId}}/reject",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "role-requests",
+                "admin",
+                "{{roleRequestId}}",
+                "reject"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Health & Meta",
+      "description": "Unauthenticated service checks.",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{host}}/health",
+              "host": [
+                "{{host}}"
+              ],
+              "path": [
+                "health"
+              ]
+            },
+            "description": "Liveness probe used by Render.",
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "API Root",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{host}}/",
+              "host": [
+                "{{host}}"
+              ],
+              "path": [
+                ""
+              ]
+            },
+            "description": "Welcome payload + version.",
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
